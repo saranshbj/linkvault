@@ -197,7 +197,7 @@ export default function HomeClient({ initialSites }: HomeClientProps) {
         <Link className="nav-logo" href="/">
           <span className="dot"></span> LinkVault
         </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <div className="nav-links">
           <Link href="/" className="nav-link active">Home</Link>
           <Link href="/directory" className="nav-link">Directory</Link>
         </div>
@@ -205,7 +205,7 @@ export default function HomeClient({ initialSites }: HomeClientProps) {
           <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/>
           </svg>
-          Submit Website
+          <span className="btn-label">Submit Website</span>
         </button>
       </nav>
 
