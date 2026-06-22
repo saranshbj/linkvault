@@ -1,20 +1,18 @@
 export const unstable_instant = { prefetch: 'static', unstable_disableValidation: true };
 
 import React, { Suspense } from 'react';
-import HomeClient from './HomeClient';
-import { getApprovedBacklinksSafe } from '@/lib/supabase';
+import DirectoryClient from './DirectoryClient';
+import { getApprovedBacklinksPaged } from '@/lib/supabase';
 
-// Fetch approved backlinks from Supabase and cache them with the new Next.js 16 `"use cache"` directive.
-async function fetchCachedBacklinks() {
+// Fetch first page of approved backlinks for SSR hydration
+async function fetchFirstPage() {
   'use cache';
-  const { data, error } = await getApprovedBacklinksSafe();
-  if (error) {
-    throw error;
-  }
-  return data || [];
+  const { data, count, error } = await getApprovedBacklinksPaged(1, 12, '', '', 'newest');
+  if (error) throw error;
+  return { data: data || [], count: count || 0 };
 }
 
-export default async function Home() {
+export default async function DirectoryPage() {
   return (
     <Suspense fallback={
       <div style={{
@@ -36,21 +34,17 @@ export default async function Home() {
             animation: 'spin 1s linear infinite',
             margin: '0 auto 16px'
           }} />
-          <p style={{ fontSize: '15px', color: 'var(--muted)' }}>Loading LinkVault...</p>
-          <style>{`
-            @keyframes spin {
-              to { transform: rotate(360deg); }
-            }
-          `}</style>
+          <p style={{ fontSize: '15px', color: 'var(--muted)' }}>Loading Directory...</p>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
       </div>
     }>
-      <HomeContent />
+      <DirectoryContent />
     </Suspense>
   );
 }
 
-async function HomeContent() {
-  const sites = await fetchCachedBacklinks();
-  return <HomeClient initialSites={sites} />;
+async function DirectoryContent() {
+  const { data, count } = await fetchFirstPage();
+  return <DirectoryClient initialSites={data} initialTotal={count} />;
 }
