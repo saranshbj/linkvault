@@ -17,7 +17,22 @@ const dmMono = DM_Mono({
 export const metadata: Metadata = {
   title: "LinkVault — Free Backlink Directory",
   description: "Grow your Domain Authority with a free do-follow backlink listed in our public directory. Trusted by thousands of site owners.",
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
+    apple: [
+      { url: '/apple-icon.png', sizes: '512x512', type: 'image/png' },
+    ],
+    shortcut: '/icon.svg',
+  },
+  other: {
+    'theme-color': '#0a0d14',
+    'msapplication-TileColor': '#0a0d14',
+  },
 };
+
+
 
 export default function RootLayout({
   children,

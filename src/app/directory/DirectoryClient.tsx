@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useTransition } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { Backlink, getEmoji, cleanUrl, CATEGORIES, DEFAULT_FAVICON } from '@/lib/constants';
 
@@ -15,7 +15,8 @@ export default function DirectoryClient({ initialSites, initialTotal }: Director
   const [mounted, setMounted]       = useState(false);
   const [sites, setSites]           = useState<Backlink[]>(initialSites);
   const [total, setTotal]           = useState(initialTotal);
-  const [searchQ, setSearchQ]       = useState('');
+  const [searchQ, setSearchQ]         = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage]       = useState(PAGE_SIZE);
@@ -36,6 +37,14 @@ export default function DirectoryClient({ initialSites, initialTotal }: Director
   const [formCategory, setFormCategory] = useState<string>('Software & SaaS');
 
   useEffect(() => { setMounted(true); }, []);
+
+  // ── Debounce search input — 400ms delay before firing API ─────────────────
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQ);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchQ]);
 
   // ── Server-side fetch ─────────────────────────────────────────────────────
   const fetchPage = useCallback(async (
@@ -67,15 +76,15 @@ export default function DirectoryClient({ initialSites, initialTotal }: Director
     }
   }, []);
 
-  // Re-fetch whenever filters / page change (skip the very first render since we have initialSites)
-  const isFirstRender = React.useRef(true);
+  // Re-fetch whenever debounced search / filters / page change (skip the very first render)
+  const isFirstRender = useRef(true);
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
       return;
     }
-    fetchPage(currentPage, searchQ, selectedCategory, sortMode, perPage);
-  }, [currentPage, searchQ, selectedCategory, sortMode, perPage, fetchPage]);
+    fetchPage(currentPage, debouncedSearch, selectedCategory, sortMode, perPage);
+  }, [currentPage, debouncedSearch, selectedCategory, sortMode, perPage, fetchPage]);
 
   const totalPages = Math.max(1, Math.ceil(total / perPage));
   const startIdx   = (currentPage - 1) * perPage;
